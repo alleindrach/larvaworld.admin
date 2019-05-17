@@ -6,7 +6,7 @@ import { Checkbox, Alert, Modal, Icon } from 'antd';
 import Login from '@/components/Login';
 import styles from './Login.less';
 
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
+const { Tab, UserName, Password, Mobile, Captcha, Submit, PicCaptcha } = Login;
 
 @connect(({ login, loading }) => ({
   login,
@@ -86,7 +86,7 @@ class LoginPage extends Component {
               !submitting &&
               this.renderMessage(formatMessage({ id: 'app.login.message-invalid-credentials' }))}
             <UserName
-              name="userName"
+              name="username"
               placeholder={`${formatMessage({ id: 'app.login.userName' })}: admin or user`}
               rules={[
                 {
@@ -108,6 +108,16 @@ class LoginPage extends Component {
                 e.preventDefault();
                 this.loginForm.validateFields(this.handleSubmit);
               }}
+            />
+            <PicCaptcha
+              name="captcha"
+              placeholder={formatMessage({ id: 'form.verification-code.placeholder' })}
+              rules={[
+                {
+                  required: false,
+                  message: formatMessage({ id: 'validation.verification-code.required' }),
+                },
+              ]}
             />
           </Tab>
           <Tab key="mobile" tab={formatMessage({ id: 'app.login.tab-login-mobile' })}>

@@ -23,3 +23,6 @@ export function setAuthority(authority) {
   const proAuthority = typeof authority === 'string' ? [authority] : authority;
   return localStorage.setItem('antd-pro-authority', JSON.stringify(proAuthority));
 }
+export function clearAuthority() {
+  return localStorage.removeItem('antd-pro-authority');
+}

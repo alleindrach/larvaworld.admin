@@ -4,6 +4,7 @@ import omit from 'omit.js';
 import styles from './index.less';
 import ItemMap from './map';
 import LoginContext from './loginContext';
+import appConfig from '../../config/app.config';
 
 const FormItem = Form.Item;
 
@@ -17,6 +18,7 @@ class WrapFormItem extends Component {
     super(props);
     this.state = {
       count: 0,
+      picCaptchaSeed: 0,
     };
   }
 
@@ -42,6 +44,12 @@ class WrapFormItem extends Component {
     } else {
       this.runGetCaptchaCountDown();
     }
+  };
+
+  onGetPicCaptcha = () => {
+    const date = new Date();
+    const result = date.getTime();
+    this.setState({ picCaptchaSeed: result });
   };
 
   getFormItemOptions = ({ onChange, defaultValue, customprops, rules }) => {
@@ -88,6 +96,7 @@ class WrapFormItem extends Component {
       getCaptchaSecondText,
       updateActive,
       type,
+      onGetPicCaptcha,
       ...restProps
     } = this.props;
 
@@ -112,6 +121,27 @@ class WrapFormItem extends Component {
               >
                 {count ? `${count} ${getCaptchaSecondText}` : getCaptchaButtonText}
               </Button>
+            </Col>
+          </Row>
+        </FormItem>
+      );
+    }
+    if (type === 'PicCaptcha') {
+      const inputProps = omit(otherProps, ['onGetPicCaptcha', 'countDown']);
+      const { picCaptchaSeed } = this.state;
+      return (
+        <FormItem>
+          <Row gutter={8}>
+            <Col span={16}>
+              {getFieldDecorator(name, options)(<Input {...customprops} {...inputProps} />)}
+            </Col>
+            <Col span={8}>
+              <img
+                src={`${appConfig.api.base + appConfig.api.picCaptcha}?seed=${picCaptchaSeed}`}
+                className={styles.getPicCaptcha}
+                alt=""
+                onClick={this.onGetPicCaptcha}
+              />
             </Col>
           </Row>
         </FormItem>
