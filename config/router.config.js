@@ -47,6 +47,18 @@ export default [
           },
         ],
       },
+      {
+        path: '/users',
+        icon: 'team',
+        name: 'Users',
+        routes: [
+          {
+            path: '/users/list',
+            name: 'List',
+            component: './User/UserList',
+          },
+        ],
+      },
       // forms
       {
         path: '/form',

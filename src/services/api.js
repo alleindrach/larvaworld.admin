@@ -110,6 +110,19 @@ export async function login(params) {
     data: params,
   });
 }
+export async function userlist(params) {
+  return request('/api/admin/user/list', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function userSync(params) {
+  return request('/api/admin/user/update', {
+    method: 'POST',
+    data: params,
+  });
+}
 
 export async function fakeRegister(params) {
   return request('/api/register', {
