@@ -8,7 +8,7 @@ class TagInlineEditor extends Component {
   static propTypes = {
     tags: PropTypes.object,
     onTagChanged: PropTypes.func,
-    colorizer: PropTypes.Object,
+    colorizer: PropTypes.any,
   };
 
   static defaultProps = {
@@ -86,7 +86,7 @@ class TagInlineEditor extends Component {
     const { colorizer } = this.props;
     return (
       <div>
-        {tags.map((tag, index) => {
+        {tags.map(tag => {
           const isLongTag = tag.length > 20;
           const tagElem = (
             <Tag
