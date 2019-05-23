@@ -1,4 +1,4 @@
-import { userlist, userSync } from '@/services/api';
+import { userlist, userSync, userAdd } from '@/services/api';
 import resultErrorHandler from '../utils/resultErrorHandler';
 
 export default {
@@ -74,6 +74,14 @@ export default {
         yield put({ type: 'clean', payload: response.data.id });
       }
     },
+    *new({ payload }, { call, put }) {
+      const { record } = payload;
+      const response = yield call(userAdd, { ...record });
+      yield call(resultErrorHandler, response);
+      if (response.success) {
+        yield put({ type: 'clean', payload: response.data.id });
+      }
+    },
     // *changeEnabled({payload},{put}){
     //   yield put({
     //     type:'changeEnabled',
@@ -113,21 +121,25 @@ export default {
       if (action.payload) {
         return {
           ...state,
+          list: state.list.filter(item => item.id !== 'new'),
           pagination: {
             ...state.pagination,
             filters: action.payload.filters,
             sorters: action.payload.sorters,
             current: 0,
           },
+          editingkey: '',
         };
       }
       return state;
     },
     queryList(state, action) {
       const newList = action.payload.data
-        ? action.payload.data.list.map(i => {
-            return { ...i, key: i.id };
-          })
+        ? action.payload.data.list
+            .filter(item => item.id !== 'new')
+            .map(i => {
+              return { ...i, key: i.id };
+            })
         : [];
 
       return {
@@ -138,12 +150,43 @@ export default {
           ...action.payload.params,
           total: action.payload.data ? action.payload.data.count : 0,
         },
+        editingkey: '',
       };
     },
     edit(state, action) {
+      const newList = state.list.filter(item => item.id !== 'new');
       return {
         ...state,
+        list: newList,
         editingkey: action.payload.key,
+      };
+    },
+    add(state, action) {
+      const newList = state.list.reduce((acc, item) => {
+        if (item.id === action.payload.key) {
+          return [
+            ...acc,
+            {
+              id: 'new',
+              key: 'new',
+              username: '',
+              mobile: '',
+              role: 'ADULT',
+              authorities: ['user'],
+            },
+            { ...item },
+          ];
+        }
+        if (item.id === 'new') {
+          return [...acc];
+        }
+        return [...acc, { ...item }];
+      }, []);
+
+      return {
+        ...state,
+        list: newList,
+        editingkey: 'new',
       };
     },
     clean(state, action) {

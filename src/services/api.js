@@ -124,6 +124,13 @@ export async function userSync(params) {
   });
 }
 
+export async function userAdd(params) {
+  return request('/api/admin/user/add', {
+    method: 'POST',
+    data: params,
+  });
+}
+
 export async function fakeRegister(params) {
   return request('/api/register', {
     method: 'POST',

@@ -32,10 +32,11 @@ const EditableContext = React.createContext();
 class EditableCell extends React.Component {
   getInput = () => {
     const { inputType } = this.props;
+    const { options } = this.props;
     if (inputType === 'number') {
       return <InputNumber />;
     }
-    if (inputType === 'switcher') {
+    if (inputType === 'switch') {
       return <Switch checkedChildren="开" unCheckedChildren="关" />;
     }
     if (inputType === 'tags') {
@@ -49,6 +50,15 @@ class EditableCell extends React.Component {
             <Option key="none">none</Option>,
           ]}
         />
+      );
+    }
+    if (inputType === 'select') {
+      return (
+        <Select>
+          {options.map(op => (
+            <Option key={op.key}>{op.option}</Option>
+          ))}
+        </Select>
       );
     }
     return <Input />;
@@ -433,6 +443,9 @@ class UserList extends PureComponent {
       dataIndex: 'role',
       filterOperator: 'is',
       filters: [{ text: 'ADULT', value: 'ADULT' }, { text: 'KID', value: 'KID' }],
+      inputType: 'select',
+      options: [{ option: 'ADULT', key: 'ADULT' }, { option: 'KID', key: 'KID' }],
+      editable: true,
     },
     {
       title: 'Phone',
@@ -456,7 +469,7 @@ class UserList extends PureComponent {
     {
       title: 'Status',
       dataIndex: 'enabled',
-      inputType: 'switcher',
+      inputType: 'switch',
 
       editable: true,
       converter: v => {
@@ -586,7 +599,20 @@ class UserList extends PureComponent {
             </Popconfirm>
           </span>
         ) : (
-          <Icon type="edit" disabled={editingkey !== ''} onClick={() => this.edit(record.key)} />
+          <span>
+            <Icon
+              type="edit"
+              disabled={editingkey !== ''}
+              onClick={() => this.edit(record.key)}
+              className={styles.operatorIcon}
+            />
+            <Icon
+              type="plus"
+              disabled={editingkey !== ''}
+              onClick={() => this.add(record.key)}
+              className={styles.operatorIcon}
+            />
+          </span>
         );
       },
       fixed: 'right',
@@ -615,7 +641,7 @@ class UserList extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'users/edit',
-      payload: { key: null },
+      payload: { key: '' },
     });
   };
 
@@ -632,34 +658,56 @@ class UserList extends PureComponent {
 
       const newData = [...list];
       const index = newData.findIndex(item => key === item.key);
-      if (index > -1) {
+      const record = {
+        ...row,
+        id: key,
+        enabled: row.enabled ? 1 : 0,
+      };
+      if (index > -1 && key !== 'new') {
         // const item = newData[index];
         // newData.splice(index, 1, {
         //   ...item,
         //   ...row,
         // });
-        const record = {
-          ...row,
-          id: key,
-          enabled: row.enabled ? 1 : 0,
-        };
+
         dispatch({
           type: 'users/sync',
           payload: { record },
         });
         // 更新
       } else {
-        // 新增
+        dispatch({
+          type: 'users/new',
+          payload: { record },
+        });
       }
     });
   }
 
   edit(key) {
     const { dispatch } = this.props;
-    dispatch({
-      type: 'users/edit',
-      payload: { key },
-    });
+    const {
+      users: { editingkey },
+    } = this.props;
+    if (editingkey === '') {
+      dispatch({
+        type: 'users/edit',
+        payload: { key },
+      });
+    }
+  }
+
+  add(key) {
+    const {
+      users: { editingkey },
+    } = this.props;
+    const { dispatch } = this.props;
+    if (editingkey === '') {
+      dispatch({
+        type: 'users/add',
+        payload: { key },
+      });
+    }
   }
 
   handleHeaderSearch = (selectedKeys, confirm) => {
@@ -996,6 +1044,7 @@ class UserList extends PureComponent {
           valuePropName: col.valuePropName,
           title: col.title,
           editing: this.isEditing(record),
+          options: col.options,
         }),
       };
     });
