@@ -7,13 +7,13 @@ import EventEmitter from 'events';
 class TagInlineEditor extends Component {
   static propTypes = {
     tags: PropTypes.object,
-    onTagChanged: PropTypes.func,
+    onChange: PropTypes.func,
     colorizer: PropTypes.any,
   };
 
   static defaultProps = {
     tags: [],
-    onTagChanged: undefined,
+    onChange: undefined,
     colorizer: {},
   };
 
@@ -26,8 +26,8 @@ class TagInlineEditor extends Component {
     };
     this.eventEmitter = new EventEmitter();
     this.eventEmitter.addListener('tagChanged', tags => {
-      const { onTagChanged } = this.props;
-      onTagChanged(tags);
+      const { onChange } = this.props;
+      onChange(tags);
     });
   }
 
@@ -45,17 +45,18 @@ class TagInlineEditor extends Component {
     const newTags = tags.filter(tag => tag !== removedTag);
     console.log(newTags);
     this.setState({ tags: newTags });
-    const { onTagChanged } = this.props;
-    if (onTagChanged) {
-      onTagChanged(newTags);
-    }
+    this.eventEmitter.emit('tagChanged', newTags);
+    // const { onChange } = this.props;
+    // if (onChange) {
+    //   onChange(newTags);
+    // }
   };
 
   showInput = () => {
     this.setState({ inputVisible: true }, () => this.input.focus());
   };
 
-  onInputChange = e => {
+  onChange = e => {
     this.setState({ inputValue: e.target.value });
   };
 
@@ -71,10 +72,11 @@ class TagInlineEditor extends Component {
       inputVisible: false,
       inputValue: '',
     });
-    const { onTagChanged } = this.props;
-    if (onTagChanged) {
-      onTagChanged(tags);
-    }
+    this.eventEmitter.emit('tagChanged', tags);
+    // const { onChange } = this.props;
+    // if (onChange) {
+    //   onChange(tags);
+    // }
   };
 
   saveInputRef = input => {
@@ -82,11 +84,11 @@ class TagInlineEditor extends Component {
   };
 
   render() {
-    const { tags, inputVisible, inputValue } = this.state;
+    const { value, inputVisible, inputValue } = this.state;
     const { colorizer } = this.props;
     return (
       <div>
-        {tags.map(tag => {
+        {value.map(tag => {
           const isLongTag = tag.length > 20;
           const tagElem = (
             <Tag
@@ -113,7 +115,7 @@ class TagInlineEditor extends Component {
             size="small"
             style={{ width: 78 }}
             value={inputValue}
-            onChange={this.onInputChange}
+            onChange={this.onChange}
             onBlur={this.onInputConfirm}
             onPressEnter={this.onInputConfirm}
           />

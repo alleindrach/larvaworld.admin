@@ -5,6 +5,7 @@ export default {
   namespace: 'users',
 
   state: {
+    editingkey: '',
     list: [],
     pagination: {
       current: 1,
@@ -20,6 +21,7 @@ export default {
     //   const pagination = yield select(state => state.users.pagination);
 
     // },
+
     *fetch({ payload }, { call, put }) {
       // const pagination = yield select(state => state.users.pagination);
       const params = {
@@ -138,6 +140,12 @@ export default {
         },
       };
     },
+    edit(state, action) {
+      return {
+        ...state,
+        editingkey: action.payload.key,
+      };
+    },
     clean(state, action) {
       const id = action.payload;
       let dirt = 0;
@@ -154,6 +162,7 @@ export default {
       return {
         ...state,
         list: newlist,
+        editingkey: '',
         dirt,
       };
     },

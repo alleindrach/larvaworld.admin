@@ -1,4 +1,4 @@
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import router from 'umi/router';
 import {
@@ -10,8 +10,6 @@ import {
   Select,
   Icon,
   Button,
-  Dropdown,
-  Menu,
   InputNumber,
   DatePicker,
   Modal,
@@ -19,6 +17,8 @@ import {
   Steps,
   Radio,
   Switch,
+  Popconfirm,
+  Tag,
 } from 'antd';
 import Highlighter from 'react-highlight-words';
 import TagInlineSelectEditor from '@/components/TagInlineSelectEditor';
@@ -26,6 +26,74 @@ import StandardTable from '@/components/StandardTable';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 
 import styles from './UserList.less';
+
+const EditableContext = React.createContext();
+
+class EditableCell extends React.Component {
+  getInput = () => {
+    const { inputType } = this.props;
+    if (inputType === 'number') {
+      return <InputNumber />;
+    }
+    if (inputType === 'switcher') {
+      return <Switch checkedChildren="开" unCheckedChildren="关" />;
+    }
+    if (inputType === 'tags') {
+      return (
+        <TagInlineSelectEditor
+          // onTagChanged={auths => this.handleAuthoritiesChanged(auths, record)}
+          options={[
+            <Option key="user">user</Option>,
+            <Option key="admin">admin</Option>,
+            <Option key="super">super</Option>,
+            <Option key="none">none</Option>,
+          ]}
+        />
+      );
+    }
+    return <Input />;
+  };
+
+  renderCell = ({ getFieldDecorator }) => {
+    const {
+      editing,
+      dataIndex,
+      title,
+      inputType,
+      valuePropName,
+      valueTrigger,
+      record,
+      index,
+      children,
+      converter,
+      ...restProps
+    } = this.props;
+    return (
+      <td {...restProps}>
+        {editing ? (
+          <Form.Item style={{ margin: 0 }}>
+            {getFieldDecorator(dataIndex, {
+              rules: [
+                {
+                  required: true,
+                  message: `Please Input ${title}!`,
+                },
+              ],
+              initialValue: converter ? converter(record[dataIndex]) : record[dataIndex],
+              valuePropName: valuePropName || 'value',
+            })(this.getInput())}
+          </Form.Item>
+        ) : (
+          children
+        )}
+      </td>
+    );
+  };
+
+  render() {
+    return <EditableContext.Consumer>{this.renderCell}</EditableContext.Consumer>;
+  }
+}
 
 const FormItem = Form.Item;
 const { Step } = Steps;
@@ -350,8 +418,10 @@ class UserList extends PureComponent {
       title: 'Name',
       dataIndex: 'username',
       sorter: true,
-
+      inputType: 'text',
+      filterOperator: 're',
       ...this.getColumnSearchProps('username'),
+      editable: true,
     },
     // {
     //   title: 'ID',
@@ -361,11 +431,15 @@ class UserList extends PureComponent {
     {
       title: 'Role',
       dataIndex: 'role',
+      filterOperator: 'is',
+      filters: [{ text: 'ADULT', value: 'ADULT' }, { text: 'KID', value: 'KID' }],
     },
-
     {
       title: 'Phone',
       dataIndex: 'mobile',
+      inputType: 'number',
+      editable: true,
+      filterOperator: 're',
       ...this.getColumnSearchProps('mobile'),
     },
     {
@@ -382,44 +456,71 @@ class UserList extends PureComponent {
     {
       title: 'Status',
       dataIndex: 'enabled',
-      render: (enabled, record) => {
+      inputType: 'switcher',
+
+      editable: true,
+      converter: v => {
+        return v === 1;
+      },
+      valuePropName: 'checked',
+      sorter: true,
+      render: value => {
         return (
           <Switch
             checkedChildren="开"
             unCheckedChildren="关"
-            defaultChecked
-            checked={enabled === 1}
-            onClick={(checked, e) => {
-              e.preventDefault();
-              this.handleEnabledChanged(checked, record);
-            }}
+            defaultChecked={value === 1}
+            disabled
           />
         );
       },
+      filterOperator: '==',
+      filters: [{ text: 'Enabled', value: '1' }, { text: 'Disabled', value: '0' }],
     },
     {
       title: 'Authorities',
       key: 'authorities',
       dataIndex: 'authorities',
-      render: (authorities, record) => (
-        <TagInlineSelectEditor
-          tags={
-            record.authorities
-              ? record.authorities.map(x => {
-                  return x.replace(/ROLE_(\w*)/, (m, p1) => {
-                    return p1.toLowerCase();
-                  });
-                })
-              : []
-          }
-          onTagChanged={auths => this.handleAuthoritiesChanged(auths, record)}
-          options={[
-            <Option key="user">user</Option>,
-            <Option key="admin">admin</Option>,
-            <Option key="none">none</Option>,
-          ]}
-        />
+      editable: true,
+      inputType: 'tags',
+
+      render: authorities => (
+        <div>
+          {authorities.map(authority => (
+            <Tag color={authority.match(/ADMIN/) ? 'volcano' : 'green'}>
+              {authority.replace(/ROLE_(\w*)/, (m, p1) => {
+                return p1.toLowerCase();
+              })}
+            </Tag>
+          ))}
+        </div>
       ),
+      filterOperator: 'has',
+      filters: [
+        { text: 'user', value: 'user' },
+        { text: 'admin', value: 'admin' },
+        { text: 'super', value: 'super' },
+      ],
+
+      // (
+      // <TagInlineSelectEditor
+      //   tags={
+      //     record.authorities
+      //       ? record.authorities.map(x => {
+      //           return x.replace(/ROLE_(\w*)/, (m, p1) => {
+      //             return p1.toLowerCase();
+      //           });
+      //         })
+      //       : []
+      //   }
+      //   onTagChanged={auths => this.handleAuthoritiesChanged(auths, record)}
+      //   options={[
+      //     <Option key="user">user</Option>,
+      //     <Option key="admin">admin</Option>,
+      //     <Option key="none">none</Option>,
+      //   ]}
+      // />
+      // ),
     },
     // {
     //   title: '服务调用次数',
@@ -463,14 +564,29 @@ class UserList extends PureComponent {
     {
       title: 'Operation',
       render: (text, record) => {
-        return (
-          <Fragment>
-            <Icon
-              type="sync"
-              style={{ color: record.dirt ? 'red' : 'gray' }}
-              onClick={() => this.handleUserSync(record)}
-            />
-          </Fragment>
+        const {
+          users: { editingkey },
+        } = this.props;
+        const editable = this.isEditing(record);
+        return editable ? (
+          <span>
+            <EditableContext.Consumer>
+              {form => (
+                <Icon
+                  // eslint-disable-next-line no-script-url
+                  type="check"
+                  color="green"
+                  onClick={() => this.save(form, record.key)}
+                  style={{ marginRight: 8 }}
+                />
+              )}
+            </EditableContext.Consumer>
+            <Popconfirm title="Sure to cancel?" onConfirm={() => this.cancel(record.key)}>
+              <Icon color="red" type="close" />
+            </Popconfirm>
+          </span>
+        ) : (
+          <Icon type="edit" disabled={editingkey !== ''} onClick={() => this.edit(record.key)} />
         );
       },
       fixed: 'right',
@@ -485,6 +601,64 @@ class UserList extends PureComponent {
       payload: {
         ...users.pagination,
       },
+    });
+  }
+
+  isEditing = record => {
+    const {
+      users: { editingkey },
+    } = this.props;
+    return record.key === editingkey;
+  };
+
+  cancel = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'users/edit',
+      payload: { key: null },
+    });
+  };
+
+  save(form, key) {
+    form.validateFields((error, row) => {
+      if (error) {
+        return;
+      }
+
+      const {
+        users: { list },
+        dispatch,
+      } = this.props;
+
+      const newData = [...list];
+      const index = newData.findIndex(item => key === item.key);
+      if (index > -1) {
+        // const item = newData[index];
+        // newData.splice(index, 1, {
+        //   ...item,
+        //   ...row,
+        // });
+        const record = {
+          ...row,
+          id: key,
+          enabled: row.enabled ? 1 : 0,
+        };
+        dispatch({
+          type: 'users/sync',
+          payload: { record },
+        });
+        // 更新
+      } else {
+        // 新增
+      }
+    });
+  }
+
+  edit(key) {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'users/edit',
+      payload: { key },
     });
   }
 
@@ -507,15 +681,21 @@ class UserList extends PureComponent {
     const { formValues } = this.state;
 
     const filters = Object.keys(filtersArg).reduce((obj, key) => {
-      const newObj = [
-        ...obj,
-        {
-          key,
-          op: 're',
-          val: getValue(filtersArg[key]),
-        },
-      ];
-      return newObj;
+      const column = this.columns.find(x => x.dataIndex === key);
+
+      const op = column.filterOperator || 're';
+      if (filtersArg[key].length > 0) {
+        const newObj = [
+          ...obj,
+          {
+            key,
+            op,
+            val: getValue(filtersArg[key]),
+          },
+        ];
+        return newObj;
+      }
+      return obj;
     }, []);
     const sorters = sorter.field
       ? [
@@ -793,14 +973,32 @@ class UserList extends PureComponent {
   }
 
   render() {
-    const { users, loading } = this.props;
+    const { users, loading, form } = this.props;
     const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
-    const menu = (
-      <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
-        <Menu.Item key="remove">删除</Menu.Item>
-        <Menu.Item key="approval">批量审批</Menu.Item>
-      </Menu>
-    );
+
+    const components = {
+      body: {
+        cell: EditableCell,
+      },
+    };
+
+    const columns = this.columns.map(col => {
+      if (!col.editable) {
+        return col;
+      }
+      return {
+        ...col,
+        onCell: record => ({
+          record,
+          inputType: col.inputType,
+          dataIndex: col.dataIndex,
+          converter: col.converter,
+          valuePropName: col.valuePropName,
+          title: col.title,
+          editing: this.isEditing(record),
+        }),
+      };
+    });
 
     const parentMethods = {
       handleAdd: this.handleAdd,
@@ -814,32 +1012,19 @@ class UserList extends PureComponent {
       <PageHeaderWrapper title="用户列表">
         <Card bordered={false}>
           <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
-                </span>
-              )}
-            </div>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={users}
-              columns={this.columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-              rowClassName={this.rowClassName}
-              scroll={{ x: 1500 }}
-            />
+            <EditableContext.Provider value={form}>
+              <StandardTable
+                components={components}
+                selectedRows={selectedRows}
+                loading={loading}
+                data={users}
+                columns={columns}
+                onSelectRow={this.handleSelectRows}
+                onChange={this.handleStandardTableChange}
+                rowClassName={this.rowClassName}
+                scroll={{ x: 1500 }}
+              />
+            </EditableContext.Provider>
           </div>
         </Card>
         <CreateForm {...parentMethods} modalVisible={modalVisible} />

@@ -6,26 +6,26 @@ import EventEmitter from 'events';
 
 class TagInlineSelectEditor extends Component {
   static propTypes = {
-    tags: PropTypes.array,
+    value: PropTypes.array,
     options: PropTypes.array,
-    onTagChanged: PropTypes.func,
+    onChange: PropTypes.func,
   };
 
   static defaultProps = {
-    tags: [],
+    value: [],
     options: [],
-    onTagChanged: undefined,
+    onChange: undefined,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      tags: props.tags || [],
+      value: props.value || [],
     };
     this.eventEmitter = new EventEmitter();
     this.eventEmitter.addListener('tagChanged', tags => {
-      const { onTagChanged } = this.props;
-      onTagChanged(tags);
+      const { onChange } = this.props;
+      onChange(tags);
     });
   }
 
@@ -39,21 +39,26 @@ class TagInlineSelectEditor extends Component {
   }
 
   onTagChanged = tags => {
-    const { onTagChanged } = this.props;
-    if (onTagChanged) {
-      onTagChanged(tags);
-    }
+    this.eventEmitter.emit('tagChanged', tags);
   };
 
   render() {
-    const { tags } = this.state;
+    const { value } = this.state;
+    const lowcaseValue = value
+      ? value.map(x => {
+          return x.replace(/ROLE_(\w*)/, (m, p1) => {
+            return p1.toLowerCase();
+          });
+        })
+      : [];
+
     const { options } = this.props;
     return (
       <Select
         mode="multiple"
         style={{ width: '100%' }}
         placeholder="Please select"
-        defaultValue={tags}
+        defaultValue={lowcaseValue}
         onChange={this.onTagChanged}
       >
         {options}
