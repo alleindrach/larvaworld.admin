@@ -19,6 +19,8 @@ import {
   Switch,
   Popconfirm,
   Tag,
+  Upload,
+  Table,
 } from 'antd';
 import Highlighter from 'react-highlight-words';
 import TagInlineSelectEditor from '@/components/TagInlineSelectEditor';
@@ -28,6 +30,8 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './UserList.less';
 
 const EditableContext = React.createContext();
+
+const { Dragger } = Upload;
 
 class EditableCell extends React.Component {
   getInput = () => {
@@ -117,31 +121,210 @@ const getValue = obj =>
 // const statusMap = ['default', 'processing', 'success', 'error'];
 // const status = ['关闭', '运行中', '已上线', '异常'];
 
-const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
-  const okHandle = () => {
-    form.validateFields((err, fieldsValue) => {
+@Form.create()
+class UserImportForm extends PureComponent {
+  static defaultProps = {};
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      results: [],
+    };
+  }
+
+  onUpdateStatus = info => {
+    const { status } = info.file;
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+      const resultList = info.file.response.data.map(item => {
+        return { name: item.data.name, message: item.data.message, success: item.success };
+      });
+      this.setState({ results: [...resultList] });
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  };
+
+  okHandle = () => {
+    const { form, handleModalVisible } = this.props;
+
+    form.validateFields((
+      err
+      /* , fieldsValue */
+    ) => {
       if (err) return;
       form.resetFields();
-      handleAdd(fieldsValue);
+      handleModalVisible();
+      // handleImport(fieldsValue);
     });
   };
-  return (
-    <Modal
-      destroyOnClose
-      title="新建规则"
-      visible={modalVisible}
-      onOk={okHandle}
-      onCancel={() => handleModalVisible()}
-    >
-      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: '请输入至少五个字符的规则描述！', min: 5 }],
-        })(<Input placeholder="请输入" />)}
-      </FormItem>
-    </Modal>
-  );
-});
+
+  render() {
+    const { modalVisible, form, handleModalVisible } = this.props;
+
+    const resultColumns = [
+      {
+        title: '用户名',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      // {
+      //   title: 'ID',
+      //   dataIndex: 'id',
+      //   key: 'id',
+      // },
+      {
+        title: '结果',
+        dataIndex: 'success',
+        key: 'success',
+        render: value => {
+          return value ? <Icon type="check" /> : <Icon type="close" />;
+        },
+      },
+      {
+        title: '备注',
+        dataIndex: 'message',
+        key: 'message',
+      },
+    ];
+
+    const uploadProps = {
+      name: 'file',
+      // multiple: true,
+      withCredentials: true,
+      action: '/api/admin/user/import',
+      // action:(file)=>{
+      //   dispatch()
+      // }
+      accept: '.xls,.xlsx,.csv,.txt',
+      onChange: this.onUpdateStatus,
+    };
+    const { results } = this.state;
+    return (
+      <Modal
+        destroyOnClose
+        title="导入"
+        visible={modalVisible}
+        onOk={this.okHandle}
+        onCancel={() => handleModalVisible()}
+      >
+        <FormItem>
+          {form.getFieldDecorator('file', {
+            rules: [{ required: false, message: '请选择文件！' }],
+          })(
+            <Dragger {...uploadProps}>
+              <p className="ant-upload-drag-icon">
+                <Icon type="inbox" />
+              </p>
+              <p className="ant-upload-text">Click or drag file to this area to upload</p>
+              <p className="ant-upload-hint">
+                Support for a single or bulk upload. Strictly prohibit from uploading company data
+                or other band files
+              </p>
+            </Dragger>
+          )}
+        </FormItem>
+        {results && results.length > 0 ? (
+          <FormItem>
+            <Table dataSource={results} columns={resultColumns} className={styles.resultTable} />
+          </FormItem>
+        ) : null}
+      </Modal>
+    );
+  }
+}
+// const UserImportForm = Form.create()(props => {
+//   const { modalVisible, form, handleImport, handleModalVisible } = props;
+//   const okHandle = () => {
+//     form.validateFields((err, fieldsValue) => {
+//       if (err) return;
+//       form.resetFields();
+//       handleImport(fieldsValue);
+//     });
+//   };
+
+//   const uploadProps = {
+//     name:'file',
+//     // multiple: true,
+//     withCredentials:true,
+//     action:'/api/admin/user/import',
+//     // action:(file)=>{
+//     //   dispatch()
+//     // }
+//     accept:'.xls,.xlsx,.csv,.txt',
+//     onChange: (info)=>{
+//       const {status} = info.file;
+//       if (status !== 'uploading') {
+//         console.log(info.file, info.fileList);
+//       }
+//       if (status === 'done') {
+//         message.success(`${info.file.name} file uploaded successfully.`);
+//         const resultList=info.file.response.data.map(item=>
+//           {
+//             return {name:item.data.name,message:item.data.message,success:item.success}
+//           }
+//         )
+//         this.setState({results:resultList})
+//       } else if (status === 'error') {
+//         message.error(`${info.file.name} file upload failed.`);
+//       }
+//     },
+//   };
+//   const resultColumns = [
+//     {
+//       title: '姓名',
+//       dataIndex: 'name',
+//       key: 'name',
+//     },
+//     {
+//       title: 'ID',
+//       dataIndex: 'id',
+//       key: 'id',
+//     },
+//     {
+//       title: '结果',
+//       dataIndex: 'success',
+//       key: 'success',
+//     },
+//     {
+//       title: '备注',
+//       dataIndex: 'message',
+//       key: 'message',
+//     },
+//   ];
+
+//   return (
+//     <Modal
+//       destroyOnClose
+//       title="导入"
+//       visible={modalVisible}
+//       onOk={okHandle}
+//       onCancel={() => handleModalVisible()}
+//     >
+//       <FormItem>
+//         {form.getFieldDecorator('file', {
+//           rules: [{ required: false, message: '请选择文件！'}],
+//         })(
+//           <Dragger {...uploadProps}>
+//             <p className="ant-upload-drag-icon">
+//               <Icon type="inbox" />
+//             </p>
+//             <p className="ant-upload-text">Click or drag file to this area to upload</p>
+//             <p className="ant-upload-hint">
+//               Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+//               band files
+//             </p>
+//           </Dragger>,
+
+//         )}
+//       </FormItem>
+
+//     </Modal>
+//   );
+// });
 
 @Form.create()
 class UpdateForm extends PureComponent {
@@ -514,66 +697,7 @@ class UserList extends PureComponent {
         { text: 'admin', value: 'admin' },
         { text: 'super', value: 'super' },
       ],
-
-      // (
-      // <TagInlineSelectEditor
-      //   tags={
-      //     record.authorities
-      //       ? record.authorities.map(x => {
-      //           return x.replace(/ROLE_(\w*)/, (m, p1) => {
-      //             return p1.toLowerCase();
-      //           });
-      //         })
-      //       : []
-      //   }
-      //   onTagChanged={auths => this.handleAuthoritiesChanged(auths, record)}
-      //   options={[
-      //     <Option key="user">user</Option>,
-      //     <Option key="admin">admin</Option>,
-      //     <Option key="none">none</Option>,
-      //   ]}
-      // />
-      // ),
     },
-    // {
-    //   title: '服务调用次数',
-    //   dataIndex: 'callNo',
-    //   sorter: true,
-    //   render: val => `${val} 万`,
-    //   // mark to display a total number
-    //   needTotal: true,
-    // },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   filters: [
-    //     {
-    //       text: status[0],
-    //       value: 0,
-    //     },
-    //     {
-    //       text: status[1],
-    //       value: 1,
-    //     },
-    //     {
-    //       text: status[2],
-    //       value: 2,
-    //     },
-    //     {
-    //       text: status[3],
-    //       value: 3,
-    //     },
-    //   ],
-    //   render(val) {
-    //     return <Badge status={statusMap[val]} text={status[val]} />;
-    //   },
-    // },
-    // {
-    //   title: '上次调度时间',
-    //   dataIndex: 'updatedAt',
-    //   sorter: true,
-    //   render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
-    // },
     {
       title: 'Operation',
       render: (text, record) => {
@@ -890,7 +1014,7 @@ class UserList extends PureComponent {
     });
   };
 
-  handleAdd = fields => {
+  handleImport = fields => {
     const { dispatch } = this.props;
     dispatch({
       type: 'users/add',
@@ -899,7 +1023,7 @@ class UserList extends PureComponent {
       },
     });
 
-    message.success('添加成功');
+    message.success('导入成功');
     this.handleModalVisible();
   };
 
@@ -1050,7 +1174,7 @@ class UserList extends PureComponent {
     });
 
     const parentMethods = {
-      handleAdd: this.handleAdd,
+      handleImport: this.handleImport,
       handleModalVisible: this.handleModalVisible,
     };
     const updateMethods = {
@@ -1058,7 +1182,14 @@ class UserList extends PureComponent {
       handleUpdate: this.handleUpdate,
     };
     return (
-      <PageHeaderWrapper title="用户列表">
+      <PageHeaderWrapper
+        title="用户列表"
+        content={
+          <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+            导入
+          </Button>
+        }
+      >
         <Card bordered={false}>
           <div className={styles.tableList}>
             <EditableContext.Provider value={form}>
@@ -1076,7 +1207,7 @@ class UserList extends PureComponent {
             </EditableContext.Provider>
           </div>
         </Card>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <UserImportForm {...parentMethods} modalVisible={modalVisible} />
         {stepFormValues && Object.keys(stepFormValues).length ? (
           <UpdateForm
             {...updateMethods}

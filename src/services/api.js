@@ -130,7 +130,13 @@ export async function userAdd(params) {
     data: params,
   });
 }
-
+// export async function userImport(params) {
+//   return request('/api/admin/user/import', {
+//     method: 'POST',
+//     data: params,
+//     requestType: 'form',
+//   });
+// }
 export async function fakeRegister(params) {
   return request('/api/register', {
     method: 'POST',
