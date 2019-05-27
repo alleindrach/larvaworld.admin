@@ -81,9 +81,9 @@ export default {
 
   proxy: {
     '/api': {
-      target: 'http://127.0.0.1:8762/',
+      target: 'http://127.0.0.1/',
       changeOrigin: true,
-      pathRewrite: { '^/api': '' }, ///api/login --> /bz/login
+      pathRewrite: { '^/api': '/bz' }, ///api/login --> /bz/login
     },
   },
   ignoreMomentLocale: true,
