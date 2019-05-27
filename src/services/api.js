@@ -130,6 +130,34 @@ export async function userAdd(params) {
     data: params,
   });
 }
+
+export async function soundChannelList(params) {
+  return request('/api/admin/sound/channel/list', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function soundChannelAdd(params) {
+  return request('/api/admin/sound/channel/add', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function soundChannelUpdate(params) {
+  return request('/api/admin/sound/channel/update', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function soundChannelDelete(params) {
+  return request('/api/admin/sound/channel/delete', {
+    method: 'POST',
+    data: params,
+  });
+}
 // export async function userImport(params) {
 //   return request('/api/admin/user/import', {
 //     method: 'POST',

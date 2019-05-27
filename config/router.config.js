@@ -59,6 +59,18 @@ export default [
           },
         ],
       },
+      {
+        path: '/story',
+        icon: 'team',
+        name: 'Story',
+        routes: [
+          {
+            path: '/story/soundchannel',
+            name: 'SoundChannel',
+            component: './Story/SoundChannel',
+          },
+        ],
+      },
       // forms
       {
         path: '/form',
