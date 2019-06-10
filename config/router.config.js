@@ -71,6 +71,12 @@ export default [
             icon: 'control',
             component: './Story/SoundChannel',
           },
+          {
+            path: '/story/soundaudit',
+            name: 'SoundAudit',
+            icon: 'customer-service',
+            component: './Story/SoundAudit',
+          },
         ],
       },
       // forms

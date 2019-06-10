@@ -158,6 +158,21 @@ export async function soundChannelDelete(params) {
     data: params,
   });
 }
+
+export async function soundList(params) {
+  return request('/api/admin/sound/audit/list', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function soundAudit(params) {
+  return request('/api/admin/sound/audit', {
+    method: 'POST',
+    data: params,
+  });
+}
+
 // export async function userImport(params) {
 //   return request('/api/admin/user/import', {
 //     method: 'POST',

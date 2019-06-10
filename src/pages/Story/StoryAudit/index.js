@@ -3,15 +3,15 @@ import { connect } from 'dva';
 import { List } from 'antd';
 
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
-import EditableSoundChannelCard from '@/components/EditableSoundChannelCard';
+import StoryCard from '@/components/StoryCard';
 
-import styles from './SoundChannel.less';
+import styles from './index.less';
 
 @connect(({ soundchannel, loading }) => ({
   soundchannel,
   loading: loading.models.soundchannel,
 }))
-class SoundChannel extends PureComponent {
+class StoryAudit extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
@@ -22,7 +22,7 @@ class SoundChannel extends PureComponent {
 
   render() {
     const {
-      soundchannel: { list },
+      sounds: { list },
       loading,
     } = this.props;
 
@@ -31,7 +31,7 @@ class SoundChannel extends PureComponent {
     const extraContent = null;
 
     return (
-      <PageHeaderWrapper title="声音变变变频道设置" content={content} extraContent={extraContent}>
+      <PageHeaderWrapper title="声音变变变审核" content={content} extraContent={extraContent}>
         <div className={styles.cardList}>
           <List
             rowKey="id"
@@ -40,7 +40,7 @@ class SoundChannel extends PureComponent {
             dataSource={['', ...list]}
             renderItem={item => (
               <List.Item>
-                <EditableSoundChannelCard data={item} />
+                <StoryCard data={item} />
               </List.Item>
             )}
           />
@@ -50,4 +50,4 @@ class SoundChannel extends PureComponent {
   }
 }
 
-export default SoundChannel;
+export default StoryAudit;

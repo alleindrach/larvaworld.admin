@@ -27,7 +27,7 @@ import TagInlineSelectEditor from '@/components/TagInlineSelectEditor';
 import StandardTable from '@/components/StandardTable';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 
-import styles from './UserList.less';
+import styles from './index.less';
 
 const EditableContext = React.createContext();
 
