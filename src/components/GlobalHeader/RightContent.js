@@ -8,6 +8,7 @@ import HeaderSearch from '../HeaderSearch';
 import HeaderDropdown from '../HeaderDropdown';
 import SelectLang from '../SelectLang';
 import styles from './index.less';
+import { getIdFileUrl } from '../../utils/utils';
 
 export default class GlobalHeaderRight extends PureComponent {
   getNoticeData() {
@@ -149,16 +150,16 @@ export default class GlobalHeaderRight extends PureComponent {
             showViewMore
           />
         </NoticeIcon>
-        {currentUser.name ? (
+        {currentUser.username ? (
           <HeaderDropdown overlay={menu}>
             <span className={`${styles.action} ${styles.account}`}>
               <Avatar
                 size="small"
                 className={styles.avatar}
-                src={currentUser.avatar}
+                src={currentUser.profile ? getIdFileUrl(currentUser.profile.avatar) : null}
                 alt="avatar"
               />
-              <span className={styles.name}>{currentUser.name}</span>
+              <span className={styles.name}>{currentUser.username}</span>
             </span>
           </HeaderDropdown>
         ) : (

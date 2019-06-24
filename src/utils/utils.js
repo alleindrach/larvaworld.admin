@@ -2,6 +2,7 @@ import moment from 'moment';
 import React from 'react';
 import nzh from 'nzh/cn';
 import { parse, stringify } from 'qs';
+import appConfig from '../config/app.config';
 
 export function fixedZero(val) {
   return val * 1 < 10 ? `0${val}` : val;
@@ -192,3 +193,6 @@ export const importCDN = (url, name) =>
     };
     document.head.appendChild(dom);
   });
+export const getIdFileUrl = id => {
+  return appConfig.api.filebase + id;
+};

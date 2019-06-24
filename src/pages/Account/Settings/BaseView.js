@@ -5,6 +5,7 @@ import { connect } from 'dva';
 import styles from './BaseView.less';
 import GeographicView from './GeographicView';
 import PhoneView from './PhoneView';
+import { getIdFileUrl } from '../../../utils/utils';
 // import { getTimeDistance } from '@/utils/utils';
 
 const FormItem = Form.Item;
@@ -71,8 +72,8 @@ class BaseView extends Component {
 
   getAvatarURL() {
     const { currentUser } = this.props;
-    if (currentUser.avatar) {
-      return currentUser.avatar;
+    if (currentUser.profile && currentUser.profile.avatar) {
+      return getIdFileUrl(currentUser.profile.avatar);
     }
     const url = 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png';
     return url;

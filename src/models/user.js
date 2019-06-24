@@ -1,4 +1,5 @@
 import { query as queryUsers, queryCurrent } from '@/services/user';
+import resultErrorHandler from '../utils/resultErrorHandler';
 
 export default {
   namespace: 'user',
@@ -18,10 +19,13 @@ export default {
     },
     *fetchCurrent(_, { call, put }) {
       const response = yield call(queryCurrent);
-      yield put({
-        type: 'saveCurrentUser',
-        payload: response,
-      });
+      yield call(resultErrorHandler, response);
+      if (response.success) {
+        yield put({
+          type: 'saveCurrentUser',
+          payload: response.data,
+        });
+      }
     },
   },
 

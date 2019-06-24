@@ -5,6 +5,7 @@ import router from 'umi/router';
 import { Card, Row, Col, Icon, Avatar, Tag, Divider, Spin, Input } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import styles from './Center.less';
+import { getIdFileUrl } from '../../../utils/utils';
 
 @connect(({ loading, user, project }) => ({
   listLoading: loading.effects['list/fetch'],
@@ -127,8 +128,15 @@ class Center extends PureComponent {
               {currentUser && Object.keys(currentUser).length ? (
                 <div>
                   <div className={styles.avatarHolder}>
-                    <img alt="" src={currentUser.avatar} />
-                    <div className={styles.name}>{currentUser.name}</div>
+                    <img
+                      alt=""
+                      src={
+                        currentUser
+                          ? getIdFileUrl(currentUser.profile.avatar)
+                          : 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png'
+                      }
+                    />
+                    <div className={styles.name}>{currentUser.username}</div>
                     <div>{currentUser.signature}</div>
                   </div>
                   <div className={styles.detail}>

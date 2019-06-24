@@ -120,12 +120,12 @@ class Workplace extends PureComponent {
       currentUser && Object.keys(currentUser).length ? (
         <div className={styles.pageHeaderContent}>
           <div className={styles.avatar}>
-            <Avatar size="large" src={currentUser.avatar} />
+            <Avatar size="large" src={currentUser.profile ? currentUser.profile.avatar : null} />
           </div>
           <div className={styles.content}>
             <div className={styles.contentTitle}>
               早安，
-              {currentUser.name}
+              {currentUser.username}
               ，祝你开心每一天！
             </div>
             <div>
