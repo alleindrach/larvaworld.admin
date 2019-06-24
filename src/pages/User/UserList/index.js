@@ -682,13 +682,16 @@ class UserList extends PureComponent {
 
       render: authorities => (
         <div>
-          {authorities.map(authority => (
-            <Tag color={authority.match(/ADMIN/) ? 'volcano' : 'green'}>
-              {authority.replace(/ROLE_(\w*)/, (m, p1) => {
-                return p1.toLowerCase();
-              })}
-            </Tag>
-          ))}
+          {authorities
+            ? authorities.map(authority => (
+                // eslint-disable-next-line react/jsx-indent
+                <Tag color={authority.match(/ADMIN/) ? 'volcano' : 'green'}>
+                  {authority.replace(/ROLE_(\w*)/, (m, p1) => {
+                    return p1.toLowerCase();
+                  })}
+                </Tag>
+              ))
+            : null}
         </div>
       ),
       filterOperator: 'has',
