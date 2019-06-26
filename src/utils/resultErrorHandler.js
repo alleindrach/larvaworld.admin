@@ -1,4 +1,5 @@
 import { notification } from 'antd';
+import { routerRedux } from 'dva/router';
 import { clearAuthority } from './authority';
 
 const resultErrorHandler = result => {
@@ -9,6 +10,8 @@ const resultErrorHandler = result => {
     });
     if (result.reason.match(/^00000\d/)) {
       clearAuthority();
+      const redirect = encodeURIComponent(window.location.href);
+      routerRedux.replace(`/user/login?redirect=${redirect}`);
     }
   }
   // return result;

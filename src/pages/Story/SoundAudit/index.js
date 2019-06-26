@@ -116,34 +116,31 @@ class SoundAudit extends PureComponent {
       ],
       editable: true,
     },
-    {
-      title: 'Status',
-      dataIndex: 'auditStatus',
-      filterOperator: 'is',
-      filters: [
-        { text: 'PENDING', value: 'PENDING' },
-        { text: 'APPROVED', value: 'APPROVED' },
-        { text: 'REJECTED', value: 'REJECTED' },
-      ],
-      inputType: 'select',
-      options: [
-        { option: 'PENDING', key: 'PENDING' },
-        { option: 'APPROVED', key: 'APPROVED' },
-        { option: 'REJECTED', key: 'REJECTED' },
-      ],
-      editable: true,
-    },
+    // {
+    //   title: 'Status',
+    //   dataIndex: 'auditStatus',
+    //   filterOperator: 'is',
+    //   filters: [
+    //     { text: 'PENDING', value: 'PENDING' },
+    //     { text: 'APPROVED', value: 'APPROVED' },
+    //     { text: 'REJECTED', value: 'REJECTED' },
+    //   ],
+    //   inputType: 'select',
+    //   options: [
+    //     { option: 'PENDING', key: 'PENDING' },
+    //     { option: 'APPROVED', key: 'APPROVED' },
+    //     { option: 'REJECTED', key: 'REJECTED' },
+    //   ],
+    //   editable: true,
+    // },
     {
       title: 'createDate',
       dataIndex: 'createDate',
       inputType: 'text',
       sorter: true,
-    },
-    {
-      title: 'auditDate',
-      dataIndex: 'auditDate',
-      inputType: 'text',
-      sorter: true,
+      render: text => {
+        return <span>{new Date(text).toLocaleDateString()}</span>;
+      },
     },
     {
       title: 'Sound',
@@ -229,6 +226,7 @@ class SoundAudit extends PureComponent {
       }
       return obj;
     }, []);
+    filters.push({ key: 'auditStatus', op: 'is', val: 'PENDING' });
     const sorters = sorter.field
       ? [
           {

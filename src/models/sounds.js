@@ -12,7 +12,7 @@ export default {
       current: 1,
       pageSize: 20,
       sorters: [],
-      filters: [],
+      filters: [{ key: 'auditStatus', op: 'is', val: 'PENDING' }],
       total: 0,
     },
   },
@@ -24,6 +24,8 @@ export default {
         size: payload.pageSize,
         sorters: payload.sorters,
         filters: payload.filters,
+        repo: 1,
+        type: 0,
       };
       const [channel, msgs] = yield all([call(soundChannelList), call(soundList, params)]);
       yield call(resultErrorHandler, channel);
