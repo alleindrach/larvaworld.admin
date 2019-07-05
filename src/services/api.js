@@ -159,15 +159,15 @@ export async function soundChannelDelete(params) {
   });
 }
 
-export async function soundList(params) {
-  return request('/api/admin/sound/audit/list', {
+export async function storyList(params) {
+  return request('/api/admin/story/audit/list', {
     method: 'POST',
     data: params,
   });
 }
 
-export async function soundAudit(params) {
-  return request('/api/admin/sound/audit', {
+export async function storyAudit(params) {
+  return request('/api/admin/story/audit', {
     method: 'POST',
     data: params,
   });

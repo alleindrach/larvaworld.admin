@@ -77,6 +77,12 @@ export default [
             icon: 'customer-service',
             component: './Story/SoundAudit',
           },
+          {
+            path: '/story/slideaudit',
+            name: 'SlideAudit',
+            icon: 'camera',
+            component: './Story/SlideAudit',
+          },
         ],
       },
       // forms

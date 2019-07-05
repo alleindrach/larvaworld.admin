@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import Audio from 'react-audioplayer';
 import { connect } from 'dva';
-import { Card, Icon, Form, Input } from 'antd';
+import { Icon, Form, Input, List } from 'antd';
 
-const { Meta } = Card;
+const {
+  Item: { Meta },
+} = List;
 const { TextArea } = Input;
 // import styles from './index.less';
 
@@ -12,7 +14,7 @@ const { TextArea } = Input;
   loading: loading.models.stories,
 }))
 @Form.create()
-class StoryCard extends Component {
+class StoryListItem extends Component {
   // class EditableSoundChannelCard extends Component {
   audioComponent = null;
 
@@ -64,27 +66,32 @@ class StoryCard extends Component {
     const { data, loading, fullPlayer, form } = this.props;
 
     return (
-      <Card
-        style={{ width: 300 }}
-        cover={
-          <Audio
-            loading={loading}
-            width={600}
-            height={300}
-            playlist={data}
-            fullPlayer={fullPlayer || true}
-            // store a reference of the audio component
-            ref={audioComponent => {
-              this.audioComponent = audioComponent;
-            }}
-          />
-        }
+      <List.Item
+        key={data.id}
         actions={[
           <Icon type="check" onClick={this.onApprove} />,
           <Icon type="close" onClick={this.onReject} />,
         ]}
+        // extra={
+        //   <img
+        //     width={272}
+        //     alt="logo"
+        //     src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+        //   />
+        // }
       >
         <Meta title={data.name} description={data.desc} />
+        <Audio
+          loading={loading}
+          width={600}
+          height={300}
+          playlist={data.scenes}
+          fullPlayer={fullPlayer || true}
+          // store a reference of the audio component
+          ref={audioComponent => {
+            this.audioComponent = audioComponent;
+          }}
+        />
         <Form layout="horizontal">
           <Form.Item>
             {form.getFieldDecorator('comment', {
@@ -103,9 +110,9 @@ class StoryCard extends Component {
             )}
           </Form.Item>
         </Form>
-      </Card>
+      </List.Item>
     );
   }
 }
 
-export default StoryCard;
+export default StoryListItem;

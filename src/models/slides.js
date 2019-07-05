@@ -1,16 +1,17 @@
-import { soundChannelList, storyList, storyAudit } from '@/services/api';
+import { storyList, storyAudit } from '@/services/api';
 
 import resultErrorHandler from '../utils/resultErrorHandler';
+import appConfig from '../config/app.config';
 
 export default {
-  namespace: 'sounds',
+  namespace: 'slides',
 
   state: {
     list: [],
     channel: [],
     pagination: {
       current: 1,
-      pageSize: 20,
+      pageSize: 5,
       sorters: [],
       filters: [{ key: 'auditStatus', op: 'is', val: 'COMPLAINT' }],
       total: 0,
@@ -18,29 +19,17 @@ export default {
   },
 
   effects: {
-    *fetch({ payload }, { all, call, put }) {
+    *fetch({ payload }, { call, put }) {
       const params = {
-        from: (payload.current - 1) * payload.pageSize,
-        size: payload.pageSize,
+        from: payload.from,
+        size: payload.size,
         sorters: payload.sorters,
         filters: payload.filters,
         repo: 1,
-        type: 0,
+        type: 1,
       };
-      const [channel, msgs] = yield all([call(soundChannelList), call(storyList, params)]);
-      yield call(resultErrorHandler, channel);
+      const msgs = yield call(storyList, params);
       yield call(resultErrorHandler, msgs);
-      if (channel.success) {
-        yield put({
-          type: 'channel',
-          payload: channel.data,
-        });
-      } else {
-        yield put({
-          type: 'channel',
-          payload: [],
-        });
-      }
 
       if (msgs.success) {
         yield put({
@@ -84,12 +73,16 @@ export default {
         ...state,
         list: action.payload.data
           ? action.payload.data.list.map(item => {
-              const filterChannels = state.channel.filter(x => x.index === item.channel);
-              if (filterChannels && filterChannels.size > 0) {
-                return { ...item, talker: item.talker.username, img: filterChannels[0].img };
-              }
-
-              return { ...item, talker: item.talker.username, img: undefined };
+              return {
+                ...item,
+                talker: item.talker.username,
+                scenes: item.scenes.map(scene => {
+                  return {
+                    src: appConfig.api.filebase + scene.snd,
+                    img: appConfig.api.filebase + scene.img,
+                  };
+                }),
+              };
             })
           : [],
         pagination: {
@@ -116,7 +109,16 @@ export default {
         ...state,
         list: filteed
           .map(item => {
-            return { ...item, talker: item.talker.username };
+            return {
+              ...item,
+              talker: item.talker.username,
+              scenes: item.scenes.map(scene => {
+                return {
+                  src: appConfig.api.filebase + scene.snd,
+                  img: appConfig.api.filebase + scene.img,
+                };
+              }),
+            };
           })
           .filter(item => item.auditStatus === 'COMPLAINT'),
       };

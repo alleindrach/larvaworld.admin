@@ -156,12 +156,12 @@ class SoundAudit extends PureComponent {
           <span>
             <Icon
               type="close-circle"
-              onClick={() => this.audit({ ids: [record.id], audit: false })}
+              onClick={() => this.audit({ data: [{ id: record.id, comment: '', audit: false }] })}
               className={styles.operatorIcon}
             />
             <Icon
               type="check-circle"
-              onClick={() => this.audit({ ids: [record.id], audit: true })}
+              onClick={() => this.audit({ data: [{ id: record.id, comment: '', audit: true }] })}
               className={styles.operatorIcon}
             />
           </span>
@@ -226,7 +226,7 @@ class SoundAudit extends PureComponent {
       }
       return obj;
     }, []);
-    filters.push({ key: 'auditStatus', op: 'is', val: 'PENDING' });
+    filters.push({ key: 'auditStatus', op: 'is', val: 'COMPLAINT' });
     const sorters = sorter.field
       ? [
           {
@@ -264,8 +264,13 @@ class SoundAudit extends PureComponent {
     dispatch({
       type: 'sounds/audit',
       payload: {
-        ids: selectedRows.map(row => row.id),
-        audit: e.key === 'approval',
+        data: selectedRows.map(row => {
+          return {
+            id: row.id,
+            audit: e.key === 'approval',
+            comment: '',
+          };
+        }),
       },
       callback: () => {
         this.setState({
