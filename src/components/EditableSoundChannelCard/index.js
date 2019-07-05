@@ -32,6 +32,22 @@ class EditableSoundChannelCard extends Component {
     }
   };
 
+  onUpdateStatusAni = info => {
+    const { form } = this.props;
+    const { status } = info.file;
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+      if (info.file.response.success) {
+        form.setFieldsValue({ ani: info.file.response.data });
+      }
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  };
+
   onDelete = () => {
     const {
       data: { id },
@@ -112,11 +128,29 @@ class EditableSoundChannelCard extends Component {
       onChange: this.onUpdateStatus,
     };
 
+    const uploadPropsAni = {
+      name: 'file',
+      // multiple: true,
+      withCredentials: true,
+      action: '/api/file',
+      // action:(file)=>{
+      //   dispatch()
+      // }
+      accept: 'image/*',
+      onChange: this.onUpdateStatusAni,
+    };
     return data ? (
       <Card
         style={{ width: 300 }}
         loading={loading}
-        cover={editing ? null : <IDImage alt="channel background" value={data.img} />}
+        cover={
+          editing ? null : (
+            <div>
+              <IDImage alt="channel background" value={data.img} />
+              <IDImage alt="channel animation" value={data.ani} />
+            </div>
+          )
+        }
         actions={
           editing
             ? [
@@ -138,7 +172,7 @@ class EditableSoundChannelCard extends Component {
         {editing ? (
           <Form layout="horizontal">
             <Dragger {...uploadProps}>
-              <Form.Item labelCol={{ span: 5 }} wrapperCol={{ span: 50 }} label="名称">
+              <Form.Item labelCol={{ span: 5 }} wrapperCol={{ span: 50 }} label="背景">
                 {form.getFieldDecorator('img', {
                   rules: [{ required: true, message: '选择图片！' }],
                   initialValue: data.img,
@@ -148,6 +182,16 @@ class EditableSoundChannelCard extends Component {
                     alt="channel background"
                     value={data.img}
                   />
+                )}
+              </Form.Item>
+            </Dragger>
+            <Dragger {...uploadPropsAni}>
+              <Form.Item labelCol={{ span: 5 }} wrapperCol={{ span: 50 }} label="动画">
+                {form.getFieldDecorator('ani', {
+                  rules: [{ required: true, message: '选择图片！' }],
+                  initialValue: data.ani,
+                })(
+                  <IDImage style={{ width: 200, height: 160 }} alt="channel ani" value={data.ani} />
                 )}
               </Form.Item>
             </Dragger>

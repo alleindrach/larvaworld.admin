@@ -85,6 +85,25 @@ export default [
           },
         ],
       },
+      {
+        path: '/gift',
+        icon: 'gift',
+        name: 'Gift',
+        routes: [
+          {
+            path: '/gift/frame',
+            name: 'Frame',
+            icon: 'picture',
+            component: './Gift/Frame',
+          },
+          {
+            path: '/gift/box',
+            name: 'Box',
+            icon: 'shopping',
+            component: './Gift/Frame',
+          },
+        ],
+      },
       // forms
       // {
       //   path: '/form',

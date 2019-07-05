@@ -194,3 +194,21 @@ export async function queryNotices(params = {}) {
 export async function getFakeCaptcha(mobile) {
   return request(`/api/captcha?mobile=${mobile}`);
 }
+
+export async function frameList(params) {
+  return request('/api/admin/gift/frame/list', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function frameSet(params) {
+  return request('/api/admin/gift/frame/set', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function frameDelete(param) {
+  return request(`/api/admin/gift/frame/delete/${param}`);
+}

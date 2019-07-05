@@ -1,27 +1,29 @@
-import {
-  soundChannelList,
-  soundChannelAdd,
-  soundChannelUpdate,
-  soundChannelDelete,
-} from '@/services/api';
+import { frameList, frameSet, frameDelete } from '@/services/api';
 
 import resultErrorHandler from '../utils/resultErrorHandler';
 
 export default {
-  namespace: 'soundchannel',
+  namespace: 'frame',
 
   state: {
     list: [],
+    pagination: {
+      current: 1,
+      pageSize: 5,
+      sorters: [],
+      filters: [{ key: 'deleted', op: 'is', val: 'false' }],
+      total: 0,
+    },
   },
 
   effects: {
     *fetch({ payload }, { call, put }) {
-      const response = yield call(soundChannelList, payload);
+      const response = yield call(frameList, payload);
       yield call(resultErrorHandler, response);
       if (response.success) {
         yield put({
           type: 'list',
-          payload: response.data,
+          payload: response.data.list,
         });
       } else {
         yield put({
@@ -31,7 +33,7 @@ export default {
       }
     },
     *delete({ payload }, { call, put }) {
-      const response = yield call(soundChannelDelete, payload);
+      const response = yield call(frameDelete, payload.id);
       yield call(resultErrorHandler, response);
       if (response.success) {
         yield put({
@@ -42,7 +44,7 @@ export default {
     },
 
     *update({ payload }, { call, put }) {
-      const response = yield call(payload.id ? soundChannelUpdate : soundChannelAdd, payload);
+      const response = yield call(frameSet, payload);
       yield call(resultErrorHandler, response);
       if (response.success) {
         yield put({
@@ -77,7 +79,7 @@ export default {
             },
           ];
         }
-        if (action.payload.new && item.index === action.payload.index) {
+        if (action.payload.new && item.order === action.payload.order) {
           return [...acc, { ...item, ...action.payload, editing: false, new: false }];
         }
         return [...acc, item];
@@ -90,7 +92,7 @@ export default {
     list(state, action) {
       return {
         ...state,
-        list: action.payload.sort((x, y) => (x.index < y.index ? 1 : -1)),
+        list: action.payload.sort((x, y) => (x.order < y.order ? 1 : -1)),
       };
     },
     remove(state, action) {
@@ -101,27 +103,19 @@ export default {
     },
     add(state) {
       if (state.list.length > 0) {
-        const appendIndex = state.list[0].index + 1;
+        const appendIndex = state.list[0].order + 1;
 
         return {
           ...state,
           list: [
-            {
-              img: null,
-              ani: null,
-              name: '',
-              index: appendIndex,
-              desc: '',
-              editing: true,
-              new: true,
-            },
+            { img: null, name: '', order: appendIndex, desc: '', editing: true, new: true },
             ...state.list,
           ],
         };
       }
       return {
         ...state,
-        list: [{ img: null, ani: null, name: '', index: 0, desc: '', editing: true, new: true }],
+        list: [{ img: null, name: '', order: 0, desc: '', editing: true, new: true }],
       };
     },
 

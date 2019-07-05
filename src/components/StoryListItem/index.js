@@ -9,9 +9,9 @@ const {
 const { TextArea } = Input;
 // import styles from './index.less';
 
-@connect(({ story, loading }) => ({
-  story,
-  loading: loading.models.stories,
+@connect(({ slides, loading }) => ({
+  slides,
+  loading: loading.models.slides,
 }))
 @Form.create()
 class StoryListItem extends Component {
@@ -26,7 +26,7 @@ class StoryListItem extends Component {
       if (err) return;
       form.resetFields();
       dispatch({
-        type: 'story/audit',
+        type: 'slides/audit',
         payload: {
           data: [
             {
@@ -47,7 +47,7 @@ class StoryListItem extends Component {
       if (err) return;
       form.resetFields();
       dispatch({
-        type: 'story/audit',
+        type: 'slides/audit',
         payload: {
           data: [
             {
