@@ -100,7 +100,7 @@ export default [
             path: '/gift/box',
             name: 'Box',
             icon: 'shopping',
-            component: './Gift/Frame',
+            component: './Gift/Box',
           },
         ],
       },

@@ -212,3 +212,21 @@ export async function frameSet(params) {
 export async function frameDelete(param) {
   return request(`/api/admin/gift/frame/delete/${param}`);
 }
+
+export async function boxList(params) {
+  return request('/api/admin/gift/box/list', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function boxSet(params) {
+  return request('/api/admin/gift/box/set', {
+    method: 'POST',
+    data: params,
+  });
+}
+
+export async function boxDelete(param) {
+  return request(`/api/admin/gift/box/delete/${param}`);
+}
